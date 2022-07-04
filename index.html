@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Curve Clock</title>
+</head>
+<body>
+
+<svg class="clock curve-clock"></svg>
+
+<style type="text/css">
+	body {
+		margin: 0;
+	}
+
+	.curve-clock {
+		background: #fff;
+		width: 100vw;
+		height: 100vh;
+	}
+
+	.curve-clock path {
+		fill: none;
+		mix-blend-mode: difference;
+	}
+
+</style>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script type="text/javascript">
+	(function() {
+		'use strict'
+
+		var size = 1000
+		var radius = size * 0.4
+
+		var tau = Math.PI * 2
+
+		var svg = d3.select('.curve-clock')
+			.attr('viewBox', [0, 0, size, size])
+
+		svg = svg.append('g')
+				.attr('transform', 'translate(' + [size/2, size/2] + ')')
+
+		var line = d3.radialLine()
+
+		var curve1 = svg.append('path').style('fill', '#c00')
+		var curve2 = svg.append('path').style('fill', '#0c0')
+		var curve3 = svg.append('path').style('fill', '#00c')
+
+		var r1 = Math.sqrt(0.9) * radius
+		var r2 = Math.sqrt(0.6) * radius
+		var r3 = Math.sqrt(0.3) * radius
+
+		function render(date) {
+			var ms = date.getMilliseconds() / 1000,
+				s = date.getSeconds() / 60,
+				m = date.getMinutes() / 60,
+				h = date.getHours() % 12 / 12
+
+			var data = [
+				[0, 0],
+				[tau * (s + ms / 60), r1],
+				[tau * (m + s / 60 + (ms / 6000)), r2],
+				[tau * (h + m / 12 + s / (12 * 60)), r3]
+			]
+
+			curve1.datum(data).attr('d', line.curve(d3.curveCatmullRomClosed.alpha(0)))
+			curve2.datum(data).attr('d', line.curve(d3.curveCatmullRomClosed.alpha(1)))
+			curve3.datum(data).attr('d', line.curve(d3.curveCatmullRomClosed.alpha(1.5)))
+		}
+
+		function tick() {
+			var now = new Date()
+			render(now)
+		}
+
+		d3.timer(tick)
+
+	})()
+</script>
+</body>
+</html>
